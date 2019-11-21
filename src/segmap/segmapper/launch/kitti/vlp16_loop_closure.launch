@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<launch>
+  
+  <arg name="respawn_value" default="false" /> <!-- boolean: true, false -->
+  
+  <!-- Bag file path -->  
+  <arg name="bag_file" value="/home/nrsl/code/data/0704-a-300.bag"/>
+  <rosparam param="LaserMapper/bag_file" subst_value="True">$(arg bag_file)</rosparam>
+
+  <!-- Rviz visualization config file path -->
+  <arg name="rviz_config_file" value="/home/nrsl/code/data/segmap_data/kitti/kitti_loop_closure.rviz"/>
+
+  <!-- ROS parameters -->
+  <rosparam>use_sim_time: true</rosparam>
+
+  <rosparam command="load" file="$(find segmapper)/launch/kitti/vlp16_loop_closure.yaml"/>
+  
+
+  <!-- rviz node -->
+  <node name="visualizer" pkg="rviz" type="rviz" output="screen" respawn="$(arg respawn_value)" args="-d $(arg rviz_config_file)" />
+  
+  <!-- rosbag player node -->
+  <node name="player" pkg="rosbag" type="play" output="screen" args="  -r 1 -s 100 --clock  --pause $(arg bag_file)"/>
+
+    <!-- segmapper node -->
+  <include file="$(find segmapper)/launch/segmapper.launch">
+    <arg name="icp_configuration_file" value="$(find segmapper)/launch/kitti/vlp16_icp_dynamic_outdoor.yaml"/>
+    <arg name="icp_input_filters_file" value="$(find segmapper)/launch/kitti/vlp16_input_filters_outdoor.yaml"/>
+  </include>
+
+  <!-- static tf -->
+<!--    <node pkg="tf" type="static_transform_publisher" name="world_imu" args="0 0 0 0 0 0  /world /imu 10"/>
+   <node pkg="tf" type="static_transform_publisher" name="imu_velodyne" args="0 0 0 0 0 0  /imu /velodyne 10"/>
+   <node pkg="tf" type="static_transform_publisher" name="imu_cam00" args="0 0 0 0 0 0  /imu /cam00 10"/>
+   <node pkg="tf" type="static_transform_publisher" name="imu_cam01" args="0 0 0 0 0 0  /imu /cam01 10"/>
+   <node pkg="tf" type="static_transform_publisher" name="imu_cam02" args="0 0 0 0 0 0  /imu /cam02 10"/>
+   <node pkg="tf" type="static_transform_publisher" name="imu_cam03" args="0 0 0 0 0 0  /imu /cam03 10"/> -->
+</launch>
